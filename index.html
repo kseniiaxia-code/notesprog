@@ -591,7 +591,6 @@
     
     <button class="theme-btn" onclick="toggleTheme()">🎨</button>
 
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
@@ -614,10 +613,8 @@
         let visitId = null;
         let startTime = new Date();
         
-        // Логируем открытие приложения
         logEvent(analytics, 'app_open');
         
-        // Записываем начало визита
         async function trackVisitStart() {
             try {
                 const docRef = await addDoc(collection(db, "visits"), {
@@ -636,7 +633,6 @@
             }
         }
         
-        // Записываем конец визита
         async function trackVisitEnd() {
             if (!visitId) return;
             
@@ -649,7 +645,6 @@
                     duration: duration
                 });
                 
-                // Логируем в Analytics
                 logEvent(analytics, 'session_end', {
                     duration: duration
                 });
@@ -660,14 +655,11 @@
             }
         }
         
-        // Начинаем отслеживание при загрузке
         trackVisitStart();
         
-        // Отслеживаем закрытие страницы
         window.addEventListener('beforeunload', trackVisitEnd);
         window.addEventListener('pagehide', trackVisitEnd);
         
-        // Сохраняем в глобальную область для доступа
         window.trackVisitEnd = trackVisitEnd;
     </script>
 
