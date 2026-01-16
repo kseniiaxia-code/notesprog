@@ -554,6 +554,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
+            table-layout: auto;
         }
 
         table td {
@@ -562,6 +563,8 @@
             min-height: 40px;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            white-space: pre-wrap;
+            vertical-align: top;
         }
 
         body.theme-light table td, body.theme-pink table td, body.theme-leopard table td {
@@ -577,6 +580,9 @@
             font-size: inherit;
             padding: 5px;
             outline: none;
+            resize: none;
+            overflow: hidden;
+            min-height: 30px;
         }
     </style>
 </head>
@@ -589,6 +595,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAQR9SINnuRBloce9FWLFfV18XDRu_r9OU",
@@ -596,14 +603,19 @@
             projectId: "notes-appip",
             storageBucket: "notes-appip.firebasestorage.app",
             messagingSenderId: "535741298820",
-            appId: "1:535741298820:web:70b2a75ffc1b0550472ad1"
+            appId: "1:535741298820:web:70b2a75ffc1b0550472ad1",
+            measurementId: "G-5SXV4Y3SM4"
         };
         
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const analytics = getAnalytics(app);
         
         let visitId = null;
         let startTime = new Date();
+        
+        // Логируем открытие приложения
+        logEvent(analytics, 'app_open');
         
         // Записываем начало визита
         async function trackVisitStart() {
@@ -636,6 +648,12 @@
                     endTime: serverTimestamp(),
                     duration: duration
                 });
+                
+                // Логируем в Analytics
+                logEvent(analytics, 'session_end', {
+                    duration: duration
+                });
+                
                 console.log("Visit ended. Duration:", duration, "seconds");
             } catch (e) {
                 console.error("Error updating visit:", e);
@@ -1136,7 +1154,7 @@
             for (let i = 0; i < rows; i++) {
                 tableHTML += '<tr>';
                 for (let j = 0; j < cols; j++) {
-                    tableHTML += '<td><input type="text" class="table-input" placeholder="..."></td>';
+                    tableHTML += '<td><textarea class="table-input" placeholder="..." oninput="autoResize(this)" style="height: auto;"></textarea></td>';
                 }
                 tableHTML += '</tr>';
             }
@@ -1153,6 +1171,18 @@
             saveData();
             renderTasks();
             closeModal();
+            
+            // Добавляем функцию автоматического изменения размера после рендера
+            setTimeout(() => {
+                document.querySelectorAll('.table-input').forEach(textarea => {
+                    autoResize(textarea);
+                });
+            }, 100);
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
         }
 
         function toggleTask(taskId) {
