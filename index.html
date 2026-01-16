@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Comfortaa', cursive;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        /* Темы */
+        body.theme-dark { background: #1a1a1a; color: #fff; }
+        body.theme-german { background: #0a0a0a; color: #fff; }
+        body.theme-light { background: #f5f1e8; color: #2a2a2a; }
+        body.theme-pink { background: #ffe6f0; color: #4a4a4a; }
+        body.theme-leopard { 
+            background: #f4e4c1;
+            color: #3a2a1a;
+        }
+
+        body.theme-leopard::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(139,69,19,0.3) 1%, transparent 1%),
+                radial-gradient(circle at 60% 70%, rgba(101,67,33,0.3) 1.5%, transparent 1.5%),
+                radial-gradient(circle at 80% 20%, rgba(139,69,19,0.25) 1.2%, transparent 1.2%),
+                radial-gradient(circle at 40% 80%, rgba(101,67,33,0.3) 0.8%, transparent 0.8%),
+                radial-gradient(circle at 90% 60%, rgba(139,69,19,0.3) 1.3%, transparent 1.3%);
+            background-size: 200px 200px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .swastika {
+            position: absolute;
+            font-size: 35px;
+            color: #ff3333;
+            opacity: 0.3;
+            animation: float 25s infinite ease-in-out;
+            text-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+            font-weight: bold;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(40px, -40px) rotate(90deg); }
+            50% { transform: translate(-30px, 30px) rotate(180deg); }
+            75% { transform: translate(30px, 40px) rotate(270deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.4s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome {
+            text-align: center;
+            padding-top: 30vh;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-family: 'Comfortaa', cursive;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+        }
+
+        body.theme-dark .btn, body.theme-german .btn { color: #fff; }
+        body.theme-german .btn { border-color: rgba(255,51,51,0.5); }
+        body.theme-light .btn, body.theme-pink .btn, body.theme-leopard .btn { 
+            color: #2a2a2a; 
+            border-color: rgba(0,0,0,0.2); 
+            background: rgba(0,0,0,0.05); 
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            padding: 18px 50px;
+        }
+
+        body.theme-german .btn-primary {
+            background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%);
+        }
+
+        body.theme-light .btn-primary, body.theme-pink .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body.theme-leopard .btn-primary {
+            background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+        }
+
+        .theme-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+        }
+
+        .theme-btn:hover { transform: scale(1.1); }
+
+        .lists-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.7;
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .list-item {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 20px;
+            margin: 15px auto;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+        }
+
+        body.theme-light .list-item, body.theme-pink .list-item, body.theme-leopard .list-item {
+            background: rgba(0,0,0,0.03);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        .list-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .list-item h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .list-item .count {
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: rgba(40,40,40,0.95);
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        body.theme-light .modal-content, body.theme-pink .modal-content, body.theme-leopard .modal-content {
+            background: rgba(255,255,255,0.95);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .idea-list {
+            margin: 20px 0;
+        }
+
+        .idea-item {
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        body.theme-light .idea-item, body.theme-pink .idea-item, body.theme-leopard .idea-item {
+            background: rgba(0,0,0,0.03);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        .idea-item:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-family: 'Comfortaa', cursive;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: inherit;
+            outline: none;
+        }
+
+        body.theme-light input, body.theme-light select,
+        body.theme-pink input, body.theme-pink select,
+        body.theme-leopard input, body.theme-leopard select {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.2);
+        }
+
+        input::placeholder { opacity: 0.5; }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        body.theme-light .task-item, body.theme-pink .task-item, body.theme-leopard .task-item {
+            background: rgba(0,0,0,0.03);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        .task-item.completed {
+            opacity: 0.5;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        body.theme-light .checkbox, body.theme-pink .checkbox, body.theme-leopard .checkbox {
+            border-color: rgba(0,0,0,0.3);
+        }
+
+        .checkbox.checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        body.theme-german .checkbox.checked {
+            background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%);
+            border-color: #ff3333;
+        }
+
+        body.theme-light .checkbox.checked, body.theme-pink .checkbox.checked {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-color: #4facfe;
+        }
+
+        body.theme-leopard .checkbox.checked {
+            background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+            border-color: #8B4513;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .task-text {
+            flex: 1;
+            word-break: break-word;
+            cursor: text;
+            min-height: 30px;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .task-text:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .task-text[contenteditable="true"] {
+            background: rgba(255,255,255,0.1);
+            outline: 2px solid rgba(100,100,255,0.3);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+        }
+
+        .edit-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .edit-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .format-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .format-btn {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-family: 'Comfortaa', cursive;
+            color: inherit;
+        }
+
+        .format-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .format-btn.active {
+            background: rgba(100,100,255,0.3);
+        }
+
+        .firework {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border-radius: 15px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+            position: relative;
+        }
+
+        .header h2 {
+            flex: 1;
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 0 60px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            color: inherit;
+            flex-shrink: 0;
+            min-width: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: absolute;
+        }
+
+        .back-btn:first-child {
+            left: 0;
+        }
+
+        .back-btn:last-child {
+            left: 60px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            opacity: 0.5;
+            margin: 30px 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-family: 'Comfortaa', cursive;
+            font-size: 1rem;
+            color: inherit;
+            outline: none;
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        body.theme-light textarea, body.theme-pink textarea, body.theme-leopard textarea {
+            background: rgba(0,0,0,0.05);
+            border-color: rgba(0,0,0,0.2);
+        }
+
+        .task-content img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .text-preview {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+        }
+
+        input[type="color"] {
+            height: 45px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        table td {
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px;
+            min-height: 40px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        body.theme-light table td, body.theme-pink table td, body.theme-leopard table td {
+            border-color: rgba(0,0,0,0.2);
+        }
+
+        .table-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 5px;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="bg-pattern" id="bgPattern"></div>
+    
+    <button class="theme-btn" onclick="toggleTheme()">🎨</button>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQR9SINnuRBloce9FWLFfV18XDRu_r9OU",
+            authDomain: "notes-appip.firebaseapp.com",
+            projectId: "notes-appip",
+            storageBucket: "notes-appip.firebasestorage.app",
+            messagingSenderId: "535741298820",
+            appId: "1:535741298820:web:70b2a75ffc1b0550472ad1"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let visitId = null;
+        let startTime = new Date();
+        
+        // Записываем начало визита
+        async function trackVisitStart() {
+            try {
+                const docRef = await addDoc(collection(db, "visits"), {
+                    startTime: serverTimestamp(),
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    screenWidth: window.screen.width,
+                    screenHeight: window.screen.height,
+                    endTime: null,
+                    duration: null
+                });
+                visitId = docRef.id;
+                console.log("Visit tracked:", visitId);
+            } catch (e) {
+                console.error("Error tracking visit:", e);
+            }
+        }
+        
+        // Записываем конец визита
+        async function trackVisitEnd() {
+            if (!visitId) return;
+            
+            try {
+                const endTime = new Date();
+                const duration = Math.round((endTime - startTime) / 1000); // в секундах
+                
+                await updateDoc(doc(db, "visits", visitId), {
+                    endTime: serverTimestamp(),
+                    duration: duration
+                });
+                console.log("Visit ended. Duration:", duration, "seconds");
+            } catch (e) {
+                console.error("Error updating visit:", e);
+            }
+        }
+        
+        // Начинаем отслеживание при загрузке
+        trackVisitStart();
+        
+        // Отслеживаем закрытие страницы
+        window.addEventListener('beforeunload', trackVisitEnd);
+        window.addEventListener('pagehide', trackVisitEnd);
+        
+        // Сохраняем в глобальную область для доступа
+        window.trackVisitEnd = trackVisitEnd;
+    </script>
+
+    <div class="container">
+        <!-- Главный экран -->
+        <div class="screen active" id="welcomeScreen">
+            <div class="welcome">
+                <h1>Notes</h1>
+                <button class="btn btn-primary" onclick="goToLists()">Открыть</button>
+            </div>
+        </div>
+
+        <!-- Экран списков -->
+        <div class="screen" id="listsScreen">
+            <div class="lists-container">
+                <h1>Твои списки</h1>
+                <div id="listsContainer">
+                    <div class="empty-state">
+                        <h2>Пока здесь ничего нет.</h2>
+                        <button class="btn btn-primary" onclick="showCreateModal()">Создать список</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран просмотра списка -->
+        <div class="screen" id="listViewScreen">
+            <div class="lists-container">
+                <div class="header">
+                    <button class="back-btn" onclick="backToLists()">←</button>
+                    <h2 id="listTitle"></h2>
+                    <button class="back-btn" onclick="showListSettings()">⚙️</button>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-small btn-primary" onclick="showAddTaskModal()">Добавить текст</button>
+                    <button class="btn btn-small" onclick="showTableModal()">📊 Создать таблицу</button>
+                </div>
+
+                <div id="tasksContainer"></div>
+                
+                <div id="completedSection"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2>Создать список</h2>
+            <button class="btn btn-small" onclick="showCustomList()">Новый список</button>
+            <div class="idea-list" id="ideaList"></div>
+            <button class="btn" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <h2>Введи название</h2>
+            <input type="text" id="listNameInput" placeholder="Название списка">
+            
+            <h3 style="font-size: 1rem; margin: 15px 0 10px 0;">Тип списка:</h3>
+            <select id="listTypeSelect" style="color: #fff; background: rgba(255,255,255,0.1);">
+                <option value="checkbox" style="background: #2a2a2a;">Список с галочками</option>
+                <option value="numbered" style="background: #2a2a2a;">Нумерованный список</option>
+                <option value="text" style="background: #2a2a2a;">Обычный текст</option>
+            </select>
+            
+            <button class="btn btn-primary" onclick="createListWithName()">Создать</button>
+            <button class="btn" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h2>Добавить текст</h2>
+            <textarea id="taskInput" placeholder="Введи текст"></textarea>
+            <div id="imagePreview"></div>
+            
+            <div class="format-toolbar">
+                <label class="format-btn" style="cursor: pointer;">
+                    📷 Фото
+                    <input type="file" accept="image/*" onchange="addImage(event)" style="display: none;">
+                </label>
+            </div>
+            
+            <button class="btn btn-primary" onclick="addTask()">Добавить</button>
+            <button class="btn" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h2>Редактировать</h2>
+            <textarea id="editInput" placeholder="Текст"></textarea>
+            
+            <div class="format-toolbar">
+                <button class="format-btn" onclick="applyFormat('bold')"><b>Жирный</b></button>
+                <button class="format-btn" onclick="applyFormat('italic')"><i>Курсив</i></button>
+                <button class="format-btn" onclick="applyFormat('list')">• Список</button>
+                <button class="format-btn" onclick="applyFormat('numbered')">1. Нумерация</button>
+                <select id="editFontSelect" class="format-btn" style="color: #fff; background: rgba(255,255,255,0.1);">
+                    <option value="Comfortaa" style="background: #2a2a2a;">Comfortaa</option>
+                    <option value="Times New Roman" style="background: #2a2a2a;">Times New Roman</option>
+                    <option value="Arial" style="background: #2a2a2a;">Arial</option>
+                    <option value="Georgia" style="background: #2a2a2a;">Georgia</option>
+                    <option value="Courier New" style="background: #2a2a2a;">Courier New</option>
+                </select>
+                <select id="editSizeSelect" class="format-btn" style="color: #fff; background: rgba(255,255,255,0.1);">
+                    <option value="0.9rem" style="background: #2a2a2a;">Мелкий</option>
+                    <option value="1rem" selected style="background: #2a2a2a;">Обычный</option>
+                    <option value="1.2rem" style="background: #2a2a2a;">Крупный</option>
+                    <option value="1.5rem" style="background: #2a2a2a;">Очень крупный</option>
+                </select>
+                <input type="color" id="editColorPicker" class="format-btn" value="#ffffff">
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveEdit()">Сохранить</button>
+            <button class="btn" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="tableModal">
+        <div class="modal-content">
+            <h2>Создать таблицу</h2>
+            <input type="number" id="tableRows" placeholder="Количество рядов" min="1" max="20" value="3">
+            <input type="number" id="tableCols" placeholder="Количество столбцов" min="1" max="10" value="3">
+            <button class="btn btn-primary" onclick="createTable()">Создать</button>
+            <button class="btn" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2>Настройки списка</h2>
+            <button class="btn btn-small" onclick="deleteCompleted()">Удалить выполненные</button>
+            <button class="btn btn-small" onclick="deleteList()" style="background: rgba(255,51,51,0.3); border-color: #ff3333;">Удалить список</button>
+            <button class="btn" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2 id="confirmTitle"></h2>
+            <p id="confirmText" style="margin: 15px 0;"></p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="confirmAction()">Да</button>
+                <button class="btn" onclick="closeModal()">Нет</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const IDEAS = [
+            'Список покупок',
+            'Планы',
+            'Фильмы, которые хочу посмотреть',
+            'Сериалы, которые хочу посмотреть',
+            'Просмотренные фильмы',
+            'Немецкие слова/фразы',
+            'Рецепты',
+            'Идеи'
+        ];
+
+        let lists = [];
+        let currentListId = null;
+        let currentTheme = 'dark';
+        let confirmCallback = null;
+        let editingTaskId = null;
+
+        function loadData() {
+            const saved = localStorage.getItem('notesAppData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                lists = data.lists || [];
+                currentTheme = data.theme || 'dark';
+                document.body.className = `theme-${currentTheme}`;
+                updateBackground();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('notesAppData', JSON.stringify({
+                lists: lists,
+                theme: currentTheme
+            }));
+        }
+
+        function toggleTheme() {
+            const themes = ['dark', 'german', 'light', 'pink', 'leopard'];
+            const currentIndex = themes.indexOf(currentTheme);
+            currentTheme = themes[(currentIndex + 1) % themes.length];
+            document.body.className = `theme-${currentTheme}`;
+            updateBackground();
+            saveData();
+        }
+
+        function updateBackground() {
+            const pattern = document.getElementById('bgPattern');
+            pattern.innerHTML = '';
+            
+            if (currentTheme === 'german') {
+                for (let i = 0; i < 60; i++) {
+                    const swastika = document.createElement('div');
+                    swastika.className = 'swastika';
+                    swastika.textContent = Math.random() > 0.5 ? '卍' : '卐';
+                    swastika.style.left = Math.random() * 100 + '%';
+                    swastika.style.top = Math.random() * 100 + '%';
+                    swastika.style.animationDelay = Math.random() * 25 + 's';
+                    pattern.appendChild(swastika);
+                }
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToLists() {
+            showScreen('listsScreen');
+            renderLists();
+        }
+
+        function backToLists() {
+            showScreen('listsScreen');
+            renderLists();
+        }
+
+        function renderLists() {
+            const container = document.getElementById('listsContainer');
+            
+            if (lists.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>Пока здесь ничего нет.</h2>
+                        <button class="btn btn-primary" onclick="showCreateModal()">Создать список</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="showCreateModal()">Создать список</button>
+                    </div>
+                    ${lists.map(list => {
+                        const total = list.tasks.length;
+                        const completed = list.tasks.filter(t => t.completed).length;
+                        return `
+                            <div class="list-item" onclick="openList('${list.id}')">
+                                <h3>${list.name}</h3>
+                                <div class="count">${list.type === 'text' ? total + ' записей' : completed + '/' + total + ' выполнено'}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                `;
+            }
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        function showCreateModal() {
+            const usedIdeas = lists.map(l => l.name);
+            const availableIdeas = IDEAS.filter(idea => !usedIdeas.includes(idea));
+            
+            const ideaList = document.getElementById('ideaList');
+            if (availableIdeas.length > 0) {
+                ideaList.innerHTML = '<h3 style="font-size: 1rem; margin: 15px 0 10px 0;">Идеи для списка:</h3>' +
+                    availableIdeas.map(idea => 
+                        `<div class="idea-item" onclick="createListFromIdea('${idea}')">${idea}</div>`
+                    ).join('');
+            } else {
+                ideaList.innerHTML = '<p style="opacity: 0.5; margin: 10px 0;">Все идеи использованы!</p>';
+            }
+            
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function showCustomList() {
+            closeModal();
+            document.getElementById('listNameInput').value = '';
+            document.getElementById('listTypeSelect').value = 'checkbox';
+            document.getElementById('nameModal').classList.add('active');
+        }
+
+        function createListFromIdea(name) {
+            createList(name, 'checkbox');
+            closeModal();
+        }
+
+        function createListWithName() {
+            const name = document.getElementById('listNameInput').value.trim();
+            const type = document.getElementById('listTypeSelect').value;
+            if (name) {
+                createList(name, type);
+                closeModal();
+            }
+        }
+
+        function createList(name, type) {
+            const list = {
+                id: Date.now().toString(),
+                name: name,
+                type: type || 'checkbox',
+                tasks: []
+            };
+            lists.push(list);
+            saveData();
+            renderLists();
+        }
+
+        function openList(id) {
+            currentListId = id;
+            const list = lists.find(l => l.id === id);
+            document.getElementById('listTitle').textContent = list.name;
+            showScreen('listViewScreen');
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const list = lists.find(l => l.id === currentListId);
+            const activeTasks = list.tasks.filter(t => !t.completed);
+            const completedTasks = list.tasks.filter(t => t.completed);
+            
+            const container = document.getElementById('tasksContainer');
+            
+            if (list.type === 'numbered') {
+                container.innerHTML = activeTasks.map((task, idx) => 
+                    `<div class="task-item">
+                        <div style="font-weight: bold; flex-shrink: 0;">${idx + 1}.</div>
+                        <div class="task-text task-content" contenteditable="true" onblur="saveInlineEdit('${task.id}', this)">${task.html || task.text}</div>
+                        <button class="edit-btn" onclick="editTask('${task.id}')">✏️</button>
+                    </div>`
+                ).join('');
+            } else if (list.type === 'text') {
+                container.innerHTML = activeTasks.map(task => 
+                    `<div class="task-item">
+                        <div class="task-text task-content text-preview" contenteditable="true" onblur="saveInlineEdit('${task.id}', this)" style="width: 100%;">${task.html || task.text}</div>
+                        <button class="edit-btn" onclick="editTask('${task.id}')">✏️</button>
+                    </div>`
+                ).join('');
+            } else {
+                container.innerHTML = activeTasks.map(task => 
+                    `<div class="task-item">
+                        <div class="checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask('${task.id}')"></div>
+                        <div class="task-text task-content" contenteditable="true" onblur="saveInlineEdit('${task.id}', this)">${task.html || task.text}</div>
+                        <button class="edit-btn" onclick="event.stopPropagation(); editTask('${task.id}')">✏️</button>
+                    </div>`
+                ).join('');
+            }
+
+            const completedSection = document.getElementById('completedSection');
+            if (completedTasks.length > 0 && list.type === 'checkbox') {
+                completedSection.innerHTML = 
+                    '<div class="section-title">Выполненные</div>' +
+                    completedTasks.map(task => 
+                        `<div class="task-item completed" onclick="untoggleTask('${task.id}')">
+                            <div class="checkbox checked"></div>
+                            <div class="task-text task-content">${task.html || task.text}</div>
+                        </div>`
+                    ).join('');
+            } else {
+                completedSection.innerHTML = '';
+            }
+        }
+
+        function saveInlineEdit(taskId, element) {
+            const list = lists.find(l => l.id === currentListId);
+            const task = list.tasks.find(t => t.id === taskId);
+            
+            task.html = element.innerHTML;
+            task.text = element.textContent;
+            saveData();
+        }
+
+        function showAddTaskModal() {
+            document.getElementById('taskInput').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('taskModal').classList.add('active');
+        }
+
+        let currentImage = null;
+
+        function addImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = e.target.result;
+                    document.getElementById('imagePreview').innerHTML = 
+                        `<img src="${e.target.result}" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addTask() {
+            const text = document.getElementById('taskInput').value.trim();
+            if (!text && !currentImage) return;
+
+            const list = lists.find(l => l.id === currentListId);
+            
+            let html = text;
+            if (currentImage) {
+                html = `${text}<br><img src="${currentImage}" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">`;
+            }
+            
+            list.tasks.push({
+                id: Date.now().toString(),
+                text: text,
+                html: html,
+                completed: false
+            });
+            
+            currentImage = null;
+            saveData();
+            renderTasks();
+            closeModal();
+        }
+
+        function editTask(taskId) {
+            editingTaskId = taskId;
+            const list = lists.find(l => l.id === currentListId);
+            const task = list.tasks.find(t => t.id === taskId);
+            
+            document.getElementById('editInput').value = task.text;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function applyFormat(format) {
+            const textarea = document.getElementById('editInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            if (!selectedText) return;
+            
+            let newText = '';
+            if (format === 'bold') {
+                newText = `<b>${selectedText}</b>`;
+            } else if (format === 'italic') {
+                newText = `<i>${selectedText}</i>`;
+            } else if (format === 'list') {
+                const lines = selectedText.split('\n');
+                newText = lines.map(line => `• ${line}`).join('\n');
+            } else if (format === 'numbered') {
+                const lines = selectedText.split('\n');
+                newText = lines.map((line, i) => `${i+1}. ${line}`).join('\n');
+            }
+            
+            textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+        }
+
+        function saveEdit() {
+            const list = lists.find(l => l.id === currentListId);
+            const task = list.tasks.find(t => t.id === editingTaskId);
+            
+            const text = document.getElementById('editInput').value;
+            const font = document.getElementById('editFontSelect').value;
+            const size = document.getElementById('editSizeSelect').value;
+            const color = document.getElementById('editColorPicker').value;
+            
+            let html = text.replace(/\n/g, '<br>');
+            html = `<div style="font-family: ${font}; font-size: ${size}; color: ${color};">${html}</div>`;
+            
+            task.text = text;
+            task.html = html;
+            
+            saveData();
+            renderTasks();
+            closeModal();
+        }
+
+        function showTableModal() {
+            document.getElementById('tableModal').classList.add('active');
+        }
+
+        function createTable() {
+            const rows = parseInt(document.getElementById('tableRows').value) || 3;
+            const cols = parseInt(document.getElementById('tableCols').value) || 3;
+            
+            let tableHTML = '<table>';
+            for (let i = 0; i < rows; i++) {
+                tableHTML += '<tr>';
+                for (let j = 0; j < cols; j++) {
+                    tableHTML += '<td><input type="text" class="table-input" placeholder="..."></td>';
+                }
+                tableHTML += '</tr>';
+            }
+            tableHTML += '</table>';
+            
+            const list = lists.find(l => l.id === currentListId);
+            list.tasks.push({
+                id: Date.now().toString(),
+                text: 'Таблица',
+                html: tableHTML,
+                completed: false
+            });
+            
+            saveData();
+            renderTasks();
+            closeModal();
+        }
+
+        function toggleTask(taskId) {
+            const list = lists.find(l => l.id === currentListId);
+            const task = list.tasks.find(t => t.id === taskId);
+            
+            if (!task.completed) {
+                confirmCallback = () => {
+                    task.completed = true;
+                    saveData();
+                    renderTasks();
+                    launchFireworks();
+                    closeModal();
+                };
+                
+                document.getElementById('confirmTitle').textContent = 'Пометить как выполненное?';
+                document.getElementById('confirmText').textContent = '';
+                document.getElementById('confirmModal').classList.add('active');
+            }
+        }
+
+        function untoggleTask(taskId) {
+            const list = lists.find(l => l.id === currentListId);
+            const task = list.tasks.find(t => t.id === taskId);
+            
+            confirmCallback = () => {
+                task.completed = false;
+                saveData();
+                renderTasks();
+                closeModal();
+            };
+            
+            document.getElementById('confirmTitle').textContent = 'Вернуть пункт назад?';
+            document.getElementById('confirmText').textContent = '';
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function confirmAction() {
+            if (confirmCallback) {
+                confirmCallback();
+                confirmCallback = null;
+            }
+        }
+
+        function launchFireworks() {
+            const colors = ['#667eea', '#764ba2', '#ff6ec7', '#4facfe', '#00f2fe'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.left = Math.random() * window.innerWidth + 'px';
+                    firework.style.top = Math.random() * window.innerHeight + 'px';
+                    
+                    document.body.appendChild(firework);
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = 100 + Math.random() * 100;
+                    const vx = Math.cos(angle) * velocity;
+                    const vy = Math.sin(angle) * velocity;
+                    
+                    let x = parseFloat(firework.style.left);
+                    let y = parseFloat(firework.style.top);
+                    let opacity = 1;
+                    
+                    const animate = () => {
+                        x += vx * 0.016;
+                        y += vy * 0.016;
+                        opacity -= 0.02;
+                        
+                        firework.style.left = x + 'px';
+                        firework.style.top = y + 'px';
+                        firework.style.opacity = opacity;
+                        
+                        if (opacity > 0) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            firework.remove();
+                        }
+                    };
+                    
+                    animate();
+                }, i * 30);
+            }
+        }
+
+        function showListSettings() {
+            const list = lists.find(l => l.id === currentListId);
+            const settingsModal = document.getElementById('settingsModal');
+            
+            if (list.type === 'checkbox') {
+                settingsModal.querySelector('.modal-content').innerHTML = `
+                    <h2>Настройки списка</h2>
+                    <button class="btn btn-small" onclick="deleteCompleted()">Удалить выполненные</button>
+                    <button class="btn btn-small" onclick="deleteList()" style="background: rgba(255,51,51,0.3); border-color: #ff3333;">Удалить список</button>
+                    <button class="btn" onclick="closeModal()">Закрыть</button>
+                `;
+            } else {
+                settingsModal.querySelector('.modal-content').innerHTML = `
+                    <h2>Настройки списка</h2>
+                    <button class="btn btn-small" onclick="deleteList()" style="background: rgba(255,51,51,0.3); border-color: #ff3333;">Удалить список</button>
+                    <button class="btn" onclick="closeModal()">Закрыть</button>
+                `;
+            }
+            
+            settingsModal.classList.add('active');
+        }
+
+        function deleteCompleted() {
+            const list = lists.find(l => l.id === currentListId);
+            list.tasks = list.tasks.filter(t => !t.completed);
+            saveData();
+            renderTasks();
+            closeModal();
+        }
+
+        function deleteList() {
+            confirmCallback = () => {
+                lists = lists.filter(l => l.id !== currentListId);
+                saveData();
+                closeModal();
+                backToLists();
+            };
+            
+            document.getElementById('confirmTitle').textContent = 'Удалить список?';
+            document.getElementById('confirmText').textContent = 'Все данные будут потеряны';
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        loadData();
+        updateBackground();
+    </script>
+</body>
+</html>
